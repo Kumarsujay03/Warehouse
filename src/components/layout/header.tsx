@@ -44,7 +44,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const today = formatDate(new Date());
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
       {/* Sidebar toggle */}
       <button
         onClick={onToggleSidebar}

@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { FeedView } from "./feed-view";
+import { BackButton } from "@/components/back-button";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +18,12 @@ export default async function FeedPage() {
   const posts = await getFeedPosts();
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Feed</h1>
-        <p className="text-muted-foreground">Preview posts like a LinkedIn feed. Ready and scheduled posts appear first.</p>
+      <div className="flex items-center gap-3">
+        <BackButton />
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Feed</h1>
+          <p className="text-muted-foreground">Preview posts like a LinkedIn feed. Ready and scheduled posts appear first.</p>
+        </div>
       </div>
       <FeedView posts={posts} />
     </div>

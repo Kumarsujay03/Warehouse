@@ -28,7 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         style={{ paddingLeft: isDesktop && sidebarOpen ? "224px" : "0px" }}
       >
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 p-5 md:p-6">{children}</main>
       </div>
       <CommandPalette />
     </div>

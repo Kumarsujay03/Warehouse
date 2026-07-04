@@ -80,7 +80,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {statCards.map((stat) => (
           <Link key={stat.label} href={stat.href}>
             <Card className="transition-colors hover:bg-accent/50 hover-lift">
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         <Link href="/posts/new">
           <Card className="cursor-pointer transition-colors hover:bg-accent/50 hover-lift">
             <CardContent className="flex items-center gap-3 p-4">
