@@ -15,7 +15,7 @@ import {
   BarChart3,
   Settings,
   PanelLeftClose,
-  PanelLeft,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
@@ -42,56 +42,55 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
 
+  if (collapsed) return null;
+
   return (
     <>
-      {!collapsed && (
-        <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={onToggle} />
-      )}
+      {/* Overlay backdrop on mobile */}
+      <div
+        className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+        onClick={onToggle}
+      />
 
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen border-r bg-card transition-all duration-200",
-          collapsed ? "-translate-x-full lg:w-[52px] lg:translate-x-0" : "w-56"
-        )}
-      >
-        <div className="flex h-full flex-col overflow-hidden">
-          <div className={cn(
-            "flex h-14 items-center border-b",
-            collapsed ? "justify-center px-2" : "justify-between px-4"
-          )}>
-            {!collapsed && (
-              <Link href="/dashboard">
-                <Logo size="sm" />
-              </Link>
-            )}
+      {/* Sidebar panel */}
+      <aside className="fixed left-0 top-0 z-50 h-screen w-56 border-r bg-card lg:z-40">
+        <div className="flex h-full flex-col">
+          {/* Header */}
+          <div className="flex h-14 items-center justify-between border-b px-4">
+            <Link href="/dashboard" onClick={onToggle}>
+              <Logo size="sm" />
+            </Link>
             <button
               onClick={onToggle}
-              className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground lg:block"
             >
-              {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+              <PanelLeftClose className="hidden h-4 w-4 lg:block" />
+              <X className="h-4 w-4 lg:hidden" />
             </button>
           </div>
 
+          {/* Navigation */}
           <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-3">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/feed" && pathname.startsWith(item.href));
+              const isActive = pathname === item.href || (item.href !== "/" && item.href !== "/feed" && pathname.startsWith(item.href));
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   prefetch={true}
-                  title={item.label}
+                  onClick={() => {
+                    // Close sidebar on mobile after navigation
+                    if (window.innerWidth < 1024) onToggle();
+                  }}
                   className={cn(
                     "flex items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
                     isActive
                       ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    collapsed && "justify-center px-0"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
+                  <span>{item.label}</span>
                 </Link>
               );
             })}

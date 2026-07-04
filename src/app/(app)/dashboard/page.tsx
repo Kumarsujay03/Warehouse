@@ -67,7 +67,7 @@ export default async function DashboardPage() {
   ]);
 
   const statCards = [
-    { label: "Posts", value: stats.posts, icon: FileText, href: "/feed" },
+    { label: "Posts", value: stats.posts, icon: FileText, href: "/posts" },
     { label: "Resources", value: stats.resources, icon: Library, href: "/library" },
     { label: "Media", value: stats.media, icon: Cloud, href: "/cloud" },
     { label: "Tags", value: stats.tags, icon: Tags, href: "/tags" },
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Link href="/feed?new=true">
+        <Link href="/posts/new">
           <Card className="cursor-pointer transition-colors hover:bg-accent/50">
             <CardContent className="flex items-center gap-3 p-4">
               <FileText className="h-5 w-5" />
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
                 {recentPosts.map((post) => (
                   <Link
                     key={post.id}
-                    href={`/feed/${post.id}`}
+                    href={`/posts/${post.id}`}
                     className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-accent"
                   >
                     <span className="text-sm font-medium">{post.title}</span>
@@ -172,7 +172,7 @@ export default async function DashboardPage() {
                 {upcomingPosts.map((post) => (
                   <Link
                     key={post.id}
-                    href={`/feed/${post.id}`}
+                    href={`/posts/${post.id}`}
                     className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-accent"
                   >
                     <span className="text-sm font-medium">{post.title}</span>
