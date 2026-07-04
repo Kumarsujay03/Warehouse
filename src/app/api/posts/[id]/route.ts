@@ -15,7 +15,7 @@ export async function GET(request: Request, context: RouteContext) {
 
   const { data, error } = await supabase
     .from("posts")
-    .select("*, post_tags(tag_id, tags(*))")
+    .select("*, post_tags(tag_id, tags(*)), post_resources(resource_id, is_primary)")
     .eq("id", id)
     .single();
 
@@ -29,7 +29,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
   const { id } = await context.params;
   const body = await request.json();
-  const { tags, ...postData } = body;
+  const { tags, linkedResources, ...postData } = body;
 
   const supabase = await createServiceRoleClient();
 
@@ -44,7 +44,7 @@ export async function PUT(request: Request, context: RouteContext) {
       hook: postData.hook || null,
       body: postData.body || null,
       notes: postData.notes || null,
-      resource_id: postData.resource_id || null,
+      resource_id: linkedResources?.[0] || postData.resource_id || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
@@ -53,14 +53,22 @@ export async function PUT(request: Request, context: RouteContext) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Sync tags: delete existing, re-insert
+  // Sync tags
   await supabase.from("post_tags").delete().eq("post_id", id);
   if (tags?.length > 0) {
-    const tagInserts = tags.map((tagId: string) => ({
-      post_id: id,
-      tag_id: tagId,
-    }));
+    const tagInserts = tags.map((tagId: string) => ({ post_id: id, tag_id: tagId }));
     await supabase.from("post_tags").insert(tagInserts);
+  }
+
+  // Sync linked resources
+  await supabase.from("post_resources").delete().eq("post_id", id);
+  if (linkedResources?.length > 0) {
+    const resInserts = linkedResources.map((rid: string, i: number) => ({
+      post_id: id,
+      resource_id: rid,
+      is_primary: i === 0,
+    }));
+    await supabase.from("post_resources").insert(resInserts);
   }
 
   return NextResponse.json({ data: post });
@@ -74,6 +82,7 @@ export async function DELETE(request: Request, context: RouteContext) {
   const supabase = await createServiceRoleClient();
 
   await supabase.from("post_tags").delete().eq("post_id", id);
+  await supabase.from("post_resources").delete().eq("post_id", id);
   const { error } = await supabase.from("posts").delete().eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

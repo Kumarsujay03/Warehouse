@@ -15,13 +15,16 @@ export default async function PostDetailPage({ params }: Props) {
 
   const { data: post } = await supabase
     .from("posts")
-    .select("*, post_tags(tag_id)")
+    .select("*, post_tags(tag_id), post_resources(resource_id, is_primary)")
     .eq("id", id)
     .single();
 
   if (!post) notFound();
 
   const tags = post.post_tags?.map((pt: { tag_id: string }) => pt.tag_id) || [];
+  const linkedResources = (post.post_resources || [])
+    .sort((a: { is_primary: boolean }, b: { is_primary: boolean }) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0))
+    .map((pr: { resource_id: string }) => pr.resource_id);
 
   return (
     <div className="space-y-6">
@@ -32,7 +35,7 @@ export default async function PostDetailPage({ params }: Props) {
           <p className="text-muted-foreground">Update your content.</p>
         </div>
       </div>
-      <PostEditor post={{ ...post, tags }} />
+      <PostEditor post={{ ...post, tags, linkedResources }} />
     </div>
   );
 }

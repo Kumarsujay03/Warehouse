@@ -74,6 +74,12 @@ export interface PostTag {
   tag_id: string;
 }
 
+export interface PostResource {
+  post_id: string;
+  resource_id: string;
+  is_primary: boolean;
+}
+
 export interface Import {
   id: string;
   filename: string;

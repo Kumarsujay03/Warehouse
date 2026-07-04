@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { tags, ...postData } = body;
+  const { tags, linkedResources, ...postData } = body;
 
   const supabase = await createServiceRoleClient();
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       hook: postData.hook || null,
       body: postData.body || null,
       notes: postData.notes || null,
-      resource_id: postData.resource_id || null,
+      resource_id: linkedResources?.[0] || postData.resource_id || null,
     })
     .select()
     .single();
@@ -45,11 +45,18 @@ export async function POST(request: Request) {
 
   // Insert tags
   if (tags?.length > 0 && post) {
-    const tagInserts = tags.map((tagId: string) => ({
-      post_id: post.id,
-      tag_id: tagId,
-    }));
+    const tagInserts = tags.map((tagId: string) => ({ post_id: post.id, tag_id: tagId }));
     await supabase.from("post_tags").insert(tagInserts);
+  }
+
+  // Insert linked resources (many-to-many)
+  if (linkedResources?.length > 0 && post) {
+    const resInserts = linkedResources.map((rid: string, i: number) => ({
+      post_id: post.id,
+      resource_id: rid,
+      is_primary: i === 0,
+    }));
+    await supabase.from("post_resources").insert(resInserts);
   }
 
   return NextResponse.json({ data: post }, { status: 201 });

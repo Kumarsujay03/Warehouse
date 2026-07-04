@@ -17,6 +17,7 @@ export async function POST(request: Request) {
   // Clear existing records if requested
   if (clearExisting) {
     await supabase.from("post_tags").delete().neq("post_id", "00000000-0000-0000-0000-000000000000");
+    await supabase.from("post_resources").delete().neq("post_id", "00000000-0000-0000-0000-000000000000");
     await supabase.from("posts").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabase.from("resources").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   }
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
 
   for (const post of posts) {
     let primaryResourceId: string | null = null;
+    const allResourceIds: string[] = [];
 
     // Handle multiple resources per post
     const allResources = post.resources?.length
@@ -72,10 +74,11 @@ export async function POST(request: Request) {
       if (!primaryResourceId) {
         primaryResourceId = resourceId;
       }
+      allResourceIds.push(resourceId);
     }
 
     // Create the post
-    const { error } = await supabase.from("posts").insert({
+    const { data: newPost, error } = await supabase.from("posts").insert({
       title: post.title,
       category: post.category || null,
       status: post.status || "draft",
@@ -83,12 +86,21 @@ export async function POST(request: Request) {
       goal: post.goal || null,
       hook: post.hook || null,
       resource_id: primaryResourceId,
-    });
+    }).select("id").single();
 
-    if (error) {
+    if (error || !newPost) {
       failed++;
     } else {
       imported++;
+      // Link all resources to this post via junction table
+      if (allResourceIds.length > 0) {
+        const resInserts = allResourceIds.map((rid: string, i: number) => ({
+          post_id: newPost.id,
+          resource_id: rid,
+          is_primary: i === 0,
+        }));
+        await supabase.from("post_resources").insert(resInserts);
+      }
     }
   }
 

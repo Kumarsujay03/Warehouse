@@ -28,7 +28,7 @@ import { useToast } from "@/components/ui/use-toast";
 import type { Post, Tag, Resource } from "@/lib/types";
 
 interface PostEditorProps {
-  post?: Post & { tags?: string[] };
+  post?: Post & { tags?: string[]; linkedResources?: string[] };
 }
 
 export function PostEditor({ post }: PostEditorProps) {
@@ -38,6 +38,7 @@ export function PostEditor({ post }: PostEditorProps) {
   const [tags, setTags] = useState<Tag[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>(post?.tags || []);
+  const [linkedResourceIds, setLinkedResourceIds] = useState<string[]>(post?.linkedResources || []);
   const [showResourceDialog, setShowResourceDialog] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [attachedMedia, setAttachedMedia] = useState<{ url: string; name: string }[]>([]);
@@ -111,7 +112,7 @@ export function PostEditor({ post }: PostEditorProps) {
       if (res.ok) {
         const data = await res.json();
         setResources((prev) => [data.data, ...prev]);
-        setForm((prev) => ({ ...prev, resource_id: data.data.id }));
+        setLinkedResourceIds((prev) => [...prev, data.data.id]);
         setShowResourceDialog(false);
         setNewResource({ title: "", type: "article", url: "", author: "" });
         toast({ title: "Resource created and linked" });
@@ -129,7 +130,7 @@ export function PostEditor({ post }: PostEditorProps) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, tags: selectedTags }),
+        body: JSON.stringify({ ...form, tags: selectedTags, linkedResources: linkedResourceIds }),
       });
       if (!res.ok) { const data = await res.json(); throw new Error(data.error || "Failed"); }
       toast({ title: post ? "Post updated" : "Post created" });
@@ -247,16 +248,33 @@ export function PostEditor({ post }: PostEditorProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Linked Resource</CardTitle>
+            <CardTitle>Resources ({linkedResourceIds.length})</CardTitle>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setShowResourceDialog(true)}><Plus className="h-4 w-4" /></Button>
           </CardHeader>
-          <CardContent>
-            <Select value={form.resource_id} onValueChange={(v) => updateField("resource_id", v)}>
-              <SelectTrigger><SelectValue placeholder="Select a resource..." /></SelectTrigger>
+          <CardContent className="space-y-3">
+            {/* Add existing resource */}
+            <Select onValueChange={(v) => { if (!linkedResourceIds.includes(v)) setLinkedResourceIds((prev) => [...prev, v]); }}>
+              <SelectTrigger><SelectValue placeholder="Link a resource..." /></SelectTrigger>
               <SelectContent>
-                {resources.map((r) => (<SelectItem key={r.id} value={r.id}>{r.title}</SelectItem>))}
+                {resources.filter((r) => !linkedResourceIds.includes(r.id)).map((r) => (<SelectItem key={r.id} value={r.id}>{r.title}</SelectItem>))}
               </SelectContent>
             </Select>
+            {/* Linked resources list */}
+            {linkedResourceIds.length > 0 && (
+              <div className="space-y-1.5">
+                {linkedResourceIds.map((rid) => {
+                  const r = resources.find((res) => res.id === rid);
+                  return (
+                    <div key={rid} className="flex items-center justify-between rounded-md border px-2.5 py-1.5 text-xs">
+                      <span className="truncate">{r?.title || rid}</span>
+                      <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => setLinkedResourceIds((prev) => prev.filter((id) => id !== rid))}>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
