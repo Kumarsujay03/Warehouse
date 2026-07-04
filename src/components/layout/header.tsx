@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Menu, Settings, LogOut, User, Loader2 } from "lucide-react";
+import { Search, PanelLeftClose, Settings, LogOut, User, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +13,11 @@ import {
 import { formatDate } from "@/lib/utils";
 
 interface HeaderProps {
-  sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
+  sidebarOpen?: boolean;
 }
 
-export function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProps) {
+export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loadingAvatar, setLoadingAvatar] = useState(true);
   const [displayName, setDisplayName] = useState("");
@@ -44,19 +44,22 @@ export function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProps) {
   const today = formatDate(new Date());
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
-      {/* Hamburger - always visible */}
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
+      {/* Sidebar toggle */}
       <button
         onClick={onToggleSidebar}
         className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-        title={sidebarCollapsed ? "Open menu" : "Close menu"}
+        title="Toggle sidebar"
       >
-        <Menu className="h-5 w-5" />
+        <PanelLeftClose
+          className="h-5 w-5 transition-transform duration-300 ease-in-out"
+          style={{ transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)" }}
+        />
       </button>
 
-      {/* Search bar */}
+      {/* Search bar - fills available space */}
       <button
-        className="flex flex-1 items-center gap-2 rounded-md border bg-muted/50 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted md:max-w-md"
+        className="flex flex-1 items-center gap-2 rounded-md border bg-muted/50 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted"
         onClick={() => {
           document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
         }}
@@ -68,9 +71,9 @@ export function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProps) {
         </kbd>
       </button>
 
-      {/* Right side */}
-      <div className="flex shrink-0 items-center gap-2">
-        <span className="hidden text-xs text-muted-foreground lg:block">{today}</span>
+      {/* Right side - date + profile */}
+      <div className="flex shrink-0 items-center gap-3">
+        <span className="hidden text-xs text-muted-foreground md:block">{today}</span>
 
         {/* Profile */}
         <DropdownMenu>
