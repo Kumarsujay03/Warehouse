@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 80%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(0 0% 9%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 25%);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 35%);
+}
+
+/* Fix date input calendar icon color */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Gmail-style hover checkbox: hidden by default, visible on hover or when selected */
+.selectable-card .select-checkbox {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.selectable-card:hover .select-checkbox,
+.selectable-card.is-selected .select-checkbox {
+  opacity: 1;
+}
+
+/* When any item is selected, show all checkboxes */
+.selection-active .select-checkbox {
+  opacity: 1;
+}
+
+/* Header select-all: hidden until selection mode */
+.header-checkbox {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.selection-active .header-checkbox {
+  opacity: 1;
+}
+
+/* Checkbox dark theme styling */
+input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid hsl(0 0% 30%);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+input[type="checkbox"]:hover {
+  border-color: hsl(0 0% 50%);
+}
+
+input[type="checkbox"]:checked {
+  background: hsl(210 100% 50%);
+  border-color: hsl(210 100% 50%);
+}
+
+input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Smooth page transitions */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main {
+  animation: pageIn 0.2s ease;
+}
+@keyframes fadeOutSlide {
+  to {
+    opacity: 0;
+    transform: translateX(-10px) scale(0.95);
+  }
+}
+
+.deleting-item {
+  animation: fadeOutSlide 0.3s ease forwards;
+}
+
+/* Card hover lift */
+.hover-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Fade in animation for new items */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.2s ease forwards;
+}
+
+/* Staggered children */
+.stagger-children > * {
+  animation: fadeInUp 0.2s ease forwards;
+  opacity: 0;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 30ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 90ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 210ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(n+10) { animation-delay: 270ms; }
