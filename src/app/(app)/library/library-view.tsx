@@ -180,7 +180,7 @@ export function LibraryView({ resources, projects }: LibraryViewProps) {
                           type="checkbox"
                           checked={selectedResources.has(resource.id)}
                           onChange={() => toggleResourceSelect(resource.id)}
-                          className="select-checkbox mt-0.5 rounded"
+                          className="select-checkbox mt-0.5 rounded shrink-0"
                           onClick={(e) => e.stopPropagation()}
                         />
                         <CardTitle className="text-sm font-medium line-clamp-2">{resource.title}</CardTitle>
@@ -219,7 +219,7 @@ export function LibraryView({ resources, projects }: LibraryViewProps) {
                     type="checkbox"
                     checked={selectedResources.has(resource.id)}
                     onChange={() => toggleResourceSelect(resource.id)}
-                    className="select-checkbox rounded"
+                    className="select-checkbox rounded shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-medium">{resource.title}</p>
@@ -268,7 +268,7 @@ export function LibraryView({ resources, projects }: LibraryViewProps) {
                       type="checkbox"
                       checked={selectedProjects.has(project.id)}
                       onChange={() => toggleProjectSelect(project.id)}
-                      className="select-checkbox mt-0.5 rounded"
+                      className="select-checkbox mt-0.5 rounded shrink-0"
                       onClick={(e) => e.stopPropagation()}
                     />
                     <div className="flex-1">

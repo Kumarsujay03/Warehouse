@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -44,8 +44,8 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [sortField, setSortField] = useState<SortField>("created_at");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [sortField, setSortField] = useState<SortField>("publish_date");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,6 +53,27 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const router = useRouter();
   const { toast } = useToast();
+
+  // Load saved preferences
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("posts_prefs");
+      if (saved) {
+        const prefs = JSON.parse(saved);
+        if (prefs.sortField) setSortField(prefs.sortField);
+        if (prefs.sortDir) setSortDir(prefs.sortDir);
+        if (prefs.pageSize) setPageSize(prefs.pageSize);
+        if (prefs.statusFilter) setStatusFilter(prefs.statusFilter);
+      }
+    } catch {}
+  }, []);
+
+  // Save preferences on change
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("posts_prefs", JSON.stringify({ sortField, sortDir, pageSize, statusFilter }));
+    } catch {}
+  }, [sortField, sortDir, pageSize, statusFilter]);
 
   const categories = useMemo(
     () => [...new Set(posts.map((p) => p.category).filter(Boolean))],
@@ -71,6 +92,10 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
     if (categoryFilter !== "all") result = result.filter((p) => p.category === categoryFilter);
 
     result.sort((a, b) => {
+      // Published posts always go to the end
+      if (a.status === "published" && b.status !== "published") return 1;
+      if (b.status === "published" && a.status !== "published") return -1;
+
       const aVal = a[sortField] || "";
       const bVal = b[sortField] || "";
       const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;

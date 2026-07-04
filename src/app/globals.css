@@ -88,19 +88,26 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Checkbox dark theme styling */
 input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
-  border: 1.5px solid hsl(0 0% 30%);
-  border-radius: 3px;
-  background: transparent;
+  min-width: 16px;
+  border: 1.5px solid hsl(0 0% 35%);
+  border-radius: 4px;
+  background: hsl(0 0% 12%);
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 input[type="checkbox"]:hover {
-  border-color: hsl(0 0% 50%);
+  border-color: hsl(0 0% 55%);
+  background: hsl(0 0% 18%);
 }
 
 input[type="checkbox"]:checked {
@@ -111,10 +118,10 @@ input[type="checkbox"]:checked {
 input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 5px;
-  height: 9px;
+  left: 4.5px;
+  top: 1.5px;
+  width: 4px;
+  height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);

@@ -202,10 +202,10 @@ export function PostEditor({ post }: PostEditorProps) {
             ) : (
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {attachedMedia.map((m, i) => (
-                  <div key={i} className="rounded border p-1">
+                  <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="group rounded border p-1 transition-colors hover:border-primary">
                     <img src={m.url} alt={m.name} className="aspect-square w-full rounded object-cover" />
-                    <p className="mt-1 truncate text-[10px] text-muted-foreground">{m.name}</p>
-                  </div>
+                    <p className="mt-1 truncate text-[10px] text-muted-foreground group-hover:text-foreground">{m.name}</p>
+                  </a>
                 ))}
               </div>
             )}
@@ -266,10 +266,19 @@ export function PostEditor({ post }: PostEditorProps) {
                   const r = resources.find((res) => res.id === rid);
                   return (
                     <div key={rid} className="flex items-center justify-between rounded-md border px-2.5 py-1.5 text-xs">
-                      <span className="truncate">{r?.title || rid}</span>
-                      <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" onClick={() => setLinkedResourceIds((prev) => prev.filter((id) => id !== rid))}>
-                        <X className="h-3 w-3" />
-                      </Button>
+                      <span className="truncate flex-1">{r?.title || rid}</span>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        {r?.url && (
+                          <a href={r.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            <Button size="icon" variant="ghost" className="h-5 w-5" title="Open in new tab">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </Button>
+                          </a>
+                        )}
+                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setLinkedResourceIds((prev) => prev.filter((id) => id !== rid))}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
