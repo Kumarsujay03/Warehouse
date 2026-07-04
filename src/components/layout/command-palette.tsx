@@ -60,6 +60,7 @@ export function CommandPalette() {
         <Command className="rounded-lg border bg-popover shadow-2xl">
           <Command.Input
             placeholder="Type a command or search..."
+            autoFocus
             className="h-12 w-full border-b bg-transparent px-4 text-sm outline-none placeholder:text-muted-foreground"
           />
           <Command.List className="max-h-80 overflow-y-auto p-2">
