@@ -107,7 +107,7 @@ export function CalendarView({ posts }: { posts: CalendarPost[] }) {
                 </div>
                 <div className="mt-1 space-y-0.5">
                   {dayPosts.slice(0, 3).map((post) => (
-                    <Link key={post.id} href={`/feed/${post.id}`}>
+                    <Link key={post.id} href={`/posts/${post.id}`}>
                       <div
                         className={`truncate rounded px-1 py-0.5 text-[10px] font-medium ${
                           statusColors[post.status] || "bg-muted"

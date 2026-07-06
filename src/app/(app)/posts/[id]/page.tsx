@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { PostEditor } from "../post-editor";
+import { PostPreview } from "../post-preview";
 import { notFound } from "next/navigation";
 import { BackButton } from "@/components/back-button";
 
@@ -7,10 +8,12 @@ export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }
 
-export default async function PostDetailPage({ params }: Props) {
+export default async function PostDetailPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { mode } = await searchParams;
   const supabase = await createServiceRoleClient();
 
   const { data: post } = await supabase
@@ -26,16 +29,33 @@ export default async function PostDetailPage({ params }: Props) {
     .sort((a: { is_primary: boolean }, b: { is_primary: boolean }) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0))
     .map((pr: { resource_id: string }) => pr.resource_id);
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <BackButton />
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Edit Post</h1>
-          <p className="text-muted-foreground">Update your content.</p>
+  // Edit mode: show the editor
+  if (mode === "edit") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <BackButton />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Edit Post</h1>
+            <p className="text-muted-foreground">Update your content.</p>
+          </div>
         </div>
+        <PostEditor post={{ ...post, tags, linkedResources }} />
       </div>
-      <PostEditor post={{ ...post, tags, linkedResources }} />
-    </div>
+    );
+  }
+
+  // Fetch all tags for preview display
+  const { data: allTags } = await supabase
+    .from("tags")
+    .select("*")
+    .order("name");
+
+  // Default: show preview
+  return (
+    <PostPreview
+      post={{ ...post, tags, linkedResources }}
+      allTags={allTags || []}
+    />
   );
 }

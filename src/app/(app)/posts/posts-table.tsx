@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, ArrowUpDown, Trash2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Plus, ArrowUpDown, Trash2, ChevronLeft, ChevronRight, Loader2, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
@@ -214,11 +214,12 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
               <TableHead><button onClick={() => toggleSort("status")} className="flex items-center gap-1">Status <ArrowUpDown className="h-3 w-3" /></button></TableHead>
               <TableHead className="hidden lg:table-cell"><button onClick={() => toggleSort("publish_date")} className="flex items-center gap-1">Date <ArrowUpDown className="h-3 w-3" /></button></TableHead>
               <TableHead className="hidden xl:table-cell">Tags</TableHead>
+              <TableHead className="w-10"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginated.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No posts found.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">No posts found.</TableCell></TableRow>
             ) : (
               paginated.map((post) => (
                 <TableRow
@@ -245,6 +246,17 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
                         <Badge key={pt.tag_id} variant="secondary" className="text-[10px]">{pt.tags?.name}</Badge>
                       ))}
                     </div>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => router.push(`/posts/${post.id}?mode=edit`)}
+                      title="Edit post"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
