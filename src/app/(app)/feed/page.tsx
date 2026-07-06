@@ -8,10 +8,27 @@ async function getFeedPosts() {
   const supabase = await createServiceRoleClient();
   const { data } = await supabase
     .from("posts")
-    .select("id, title, category, status, publish_date, hook, body, goal")
+    .select("id, title, category, status, publish_date, hook, body, goal, notes")
     .in("status", ["ready", "scheduled", "draft", "idea", "published"])
     .order("publish_date", { ascending: true });
-  return data || [];
+
+  // Fetch media for all posts in one query
+  const postIds = (data || []).map((p) => p.id);
+  const { data: media } = postIds.length > 0
+    ? await supabase
+        .from("media")
+        .select("id, url, resource_type, post_id")
+        .in("post_id", postIds)
+    : { data: [] };
+
+  // Group media by post_id
+  const mediaByPost: Record<string, { id: string; url: string; resource_type: string }[]> = {};
+  for (const m of media || []) {
+    if (!mediaByPost[m.post_id]) mediaByPost[m.post_id] = [];
+    mediaByPost[m.post_id].push({ id: m.id, url: m.url, resource_type: m.resource_type });
+  }
+
+  return (data || []).map((p) => ({ ...p, media: mediaByPost[p.id] || [] }));
 }
 
 export default async function FeedPage() {

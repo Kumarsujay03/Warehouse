@@ -59,5 +59,13 @@ export async function POST(request: Request) {
     await supabase.from("post_resources").insert(resInserts);
   }
 
+  // Link media to this post
+  if (body.mediaIds?.length > 0 && post) {
+    await supabase
+      .from("media")
+      .update({ post_id: post.id })
+      .in("id", body.mediaIds);
+  }
+
   return NextResponse.json({ data: post }, { status: 201 });
 }

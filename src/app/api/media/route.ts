@@ -13,6 +13,18 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const folder = searchParams.get("folder") || "Assests_warehouse";
+  const postId = searchParams.get("post_id");
+
+  // If requesting media for a specific post, fetch from Supabase directly
+  if (postId) {
+    const supabase = await createServiceRoleClient();
+    const { data } = await supabase
+      .from("media")
+      .select("*")
+      .eq("post_id", postId)
+      .order("created_at", { ascending: false });
+    return NextResponse.json({ data: data || [] });
+  }
 
   if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
     return NextResponse.json({ data: [], error: "Cloudinary not configured" });
@@ -98,6 +110,7 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get("file") as File;
   const folder = (formData.get("folder") as string) || "Assests_warehouse";
+  const postId = formData.get("post_id") as string | null;
 
   if (!file) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -108,7 +121,7 @@ export async function POST(request: Request) {
 
     // Also track in Supabase media table
     const supabase = await createServiceRoleClient();
-    await supabase.from("media").insert({
+    const { data: mediaRow } = await supabase.from("media").insert({
       public_id: result.public_id,
       url: result.secure_url,
       format: result.format,
@@ -117,11 +130,12 @@ export async function POST(request: Request) {
       width: result.width || null,
       height: result.height || null,
       folder,
-    });
+      post_id: postId || null,
+    }).select().single();
 
     return NextResponse.json({
       data: {
-        id: result.public_id,
+        id: mediaRow?.id || result.public_id,
         public_id: result.public_id,
         url: result.secure_url,
         format: result.format,
@@ -130,6 +144,7 @@ export async function POST(request: Request) {
         width: result.width || null,
         height: result.height || null,
         folder,
+        post_id: postId || null,
       },
     }, { status: 201 });
   } catch (err) {

@@ -23,9 +23,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Save, Trash2, X, Plus, Upload, Loader2 } from "lucide-react";
+import { Save, Trash2, X, Plus, Upload, Loader2, Link2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import type { Post, Tag, Resource } from "@/lib/types";
+
+interface MediaItem {
+  id?: string;
+  url: string;
+  name: string;
+  resource_type?: string;
+}
 
 interface PostEditorProps {
   post?: Post & { tags?: string[]; linkedResources?: string[] };
@@ -40,8 +47,11 @@ export function PostEditor({ post }: PostEditorProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(post?.tags || []);
   const [linkedResourceIds, setLinkedResourceIds] = useState<string[]>(post?.linkedResources || []);
   const [showResourceDialog, setShowResourceDialog] = useState(false);
+  const [showCloudMediaDialog, setShowCloudMediaDialog] = useState(false);
+  const [cloudMedia, setCloudMedia] = useState<MediaItem[]>([]);
+  const [loadingCloudMedia, setLoadingCloudMedia] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
-  const [attachedMedia, setAttachedMedia] = useState<{ url: string; name: string }[]>([]);
+  const [attachedMedia, setAttachedMedia] = useState<MediaItem[]>([]);
 
   const [form, setForm] = useState({
     title: post?.title || "",
@@ -65,7 +75,24 @@ export function PostEditor({ post }: PostEditorProps) {
   useEffect(() => {
     fetch("/api/tags").then((r) => r.json()).then((d) => setTags(d.data || []));
     fetch("/api/resources").then((r) => r.json()).then((d) => setResources(d.data || []));
-  }, []);
+
+    // Load existing media for this post
+    if (post?.id) {
+      fetch(`/api/media?post_id=${post.id}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.data?.length) {
+            setAttachedMedia(d.data.map((m: { id: string; url: string; public_id: string; resource_type: string }) => ({
+              id: m.id,
+              url: m.url,
+              name: m.public_id,
+              resource_type: m.resource_type,
+            })));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [post?.id]);
 
   function updateField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -86,10 +113,18 @@ export function PostEditor({ post }: PostEditorProps) {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("folder", "Assests_warehouse");
+        if (post?.id) {
+          formData.append("post_id", post.id);
+        }
         const res = await fetch("/api/media", { method: "POST", body: formData });
         if (res.ok) {
           const data = await res.json();
-          setAttachedMedia((prev) => [...prev, { url: data.data.url, name: file.name }]);
+          setAttachedMedia((prev) => [...prev, {
+            id: data.data.id,
+            url: data.data.url,
+            name: file.name,
+            resource_type: data.data.resource_type,
+          }]);
         }
       }
       toast({ title: "Media uploaded" });
@@ -99,6 +134,45 @@ export function PostEditor({ post }: PostEditorProps) {
       setUploadingMedia(false);
       e.target.value = "";
     }
+  }
+
+  async function handleRemoveMedia(index: number) {
+    const media = attachedMedia[index];
+    if (media.id) {
+      try {
+        await fetch(`/api/media/${media.id}`, { method: "DELETE" });
+      } catch {}
+    }
+    setAttachedMedia((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function handleOpenCloudMedia() {
+    setShowCloudMediaDialog(true);
+    setLoadingCloudMedia(true);
+    try {
+      const res = await fetch("/api/media?folder=Assests_warehouse");
+      const data = await res.json();
+      // Filter out media already attached to this post
+      const attachedUrls = new Set(attachedMedia.map((m) => m.url));
+      const available = (data.data || [])
+        .filter((m: { url: string }) => !attachedUrls.has(m.url))
+        .map((m: { id: string; url: string; public_id: string; resource_type: string }) => ({
+          id: m.id,
+          url: m.url,
+          name: m.public_id,
+          resource_type: m.resource_type,
+        }));
+      setCloudMedia(available);
+    } catch {
+      toast({ title: "Failed to load cloud media", variant: "destructive" });
+    } finally {
+      setLoadingCloudMedia(false);
+    }
+  }
+
+  function handleLinkCloudMedia(media: MediaItem) {
+    setAttachedMedia((prev) => [...prev, media]);
+    setCloudMedia((prev) => prev.filter((m) => m.url !== media.url));
   }
 
   async function handleCreateResource() {
@@ -127,10 +201,11 @@ export function PostEditor({ post }: PostEditorProps) {
     try {
       const url = post ? `/api/posts/${post.id}` : "/api/posts";
       const method = post ? "PUT" : "POST";
+      const mediaIds = attachedMedia.filter((m) => m.id).map((m) => m.id);
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, tags: selectedTags, linkedResources: linkedResourceIds }),
+        body: JSON.stringify({ ...form, tags: selectedTags, linkedResources: linkedResourceIds, mediaIds }),
       });
       if (!res.ok) { const data = await res.json(); throw new Error(data.error || "Failed"); }
       toast({ title: post ? "Post updated" : "Post created" });
@@ -186,15 +261,21 @@ export function PostEditor({ post }: PostEditorProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Media</CardTitle>
-            <label>
-              <Button size="sm" variant="outline" asChild disabled={uploadingMedia}>
-                <span className="cursor-pointer">
-                  {uploadingMedia ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Upload className="mr-2 h-3 w-3" />}
-                  Upload
-                </span>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={handleOpenCloudMedia}>
+                <Link2 className="mr-2 h-3 w-3" />
+                Link from Cloud
               </Button>
-              <input type="file" multiple className="hidden" onChange={handleMediaUpload} accept="image/*,video/*,.pdf" />
-            </label>
+              <label>
+                <Button size="sm" variant="outline" asChild disabled={uploadingMedia}>
+                  <span className="cursor-pointer">
+                    {uploadingMedia ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Upload className="mr-2 h-3 w-3" />}
+                    Upload
+                  </span>
+                </Button>
+                <input type="file" multiple className="hidden" onChange={handleMediaUpload} accept="image/*,video/*,.pdf" />
+              </label>
+            </div>
           </CardHeader>
           <CardContent>
             {attachedMedia.length === 0 ? (
@@ -202,10 +283,20 @@ export function PostEditor({ post }: PostEditorProps) {
             ) : (
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {attachedMedia.map((m, i) => (
-                  <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="group rounded border p-1 transition-colors hover:border-primary">
-                    <img src={m.url} alt={m.name} className="aspect-square w-full rounded object-cover" />
-                    <p className="mt-1 truncate text-[10px] text-muted-foreground group-hover:text-foreground">{m.name}</p>
-                  </a>
+                  <div key={i} className="group relative rounded border p-1 transition-colors hover:border-primary">
+                    <a href={m.url} target="_blank" rel="noopener noreferrer">
+                      <img src={m.url} alt={m.name} className="aspect-square w-full rounded object-cover" />
+                    </a>
+                    <p className="mt-1 truncate text-[10px] text-muted-foreground">{m.name}</p>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMedia(i)}
+                      className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover:flex"
+                      title="Remove media"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
@@ -334,6 +425,45 @@ export function PostEditor({ post }: PostEditorProps) {
             <div className="space-y-2"><Label>Author</Label><Input value={newResource.author} onChange={(e) => setNewResource({ ...newResource, author: e.target.value })} /></div>
           </div>
           <DialogFooter><Button onClick={handleCreateResource} disabled={!newResource.title}>Create & Link</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cloud Media Picker Dialog */}
+      <Dialog open={showCloudMediaDialog} onOpenChange={setShowCloudMediaDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader><DialogTitle>Link Media from Cloud</DialogTitle></DialogHeader>
+          {loadingCloudMedia ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : cloudMedia.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No available media in cloud, or all media is already attached.
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 gap-3 overflow-y-auto max-h-[60vh] p-1 sm:grid-cols-4">
+              {cloudMedia.map((m) => (
+                <button
+                  key={m.id || m.url}
+                  type="button"
+                  onClick={() => handleLinkCloudMedia(m)}
+                  className="group relative overflow-hidden rounded-md border transition-all hover:border-primary hover:ring-2 hover:ring-primary/30"
+                >
+                  <img
+                    src={m.url}
+                    alt={m.name}
+                    className="aspect-square w-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
+                    <Plus className="h-6 w-6 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
+                  <p className="absolute bottom-0 left-0 right-0 truncate bg-black/60 px-1.5 py-0.5 text-[9px] text-white">
+                    {m.name?.split("/").pop()}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

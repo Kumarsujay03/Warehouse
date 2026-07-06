@@ -71,6 +71,14 @@ export async function PUT(request: Request, context: RouteContext) {
     await supabase.from("post_resources").insert(resInserts);
   }
 
+  // Link media to this post
+  if (body.mediaIds?.length > 0) {
+    await supabase
+      .from("media")
+      .update({ post_id: id })
+      .in("id", body.mediaIds);
+  }
+
   return NextResponse.json({ data: post });
 }
 
