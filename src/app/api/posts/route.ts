@@ -65,6 +65,12 @@ export async function POST(request: Request) {
       .from("media")
       .update({ post_id: post.id })
       .in("id", body.mediaIds);
+
+    // Also try linking by public_id
+    await supabase
+      .from("media")
+      .update({ post_id: post.id })
+      .in("public_id", body.mediaIds);
   }
 
   return NextResponse.json({ data: post }, { status: 201 });

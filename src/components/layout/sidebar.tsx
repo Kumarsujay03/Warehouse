@@ -49,9 +49,14 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
   const [reordering, setReordering] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
+  const isInitialMount = useRef(true);
 
-  // Auto-collapse on route change
+  // Auto-collapse on route change (skip initial mount)
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (open) {
       onClose();
     }

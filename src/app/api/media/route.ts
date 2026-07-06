@@ -26,6 +26,21 @@ export async function GET(request: Request) {
     return NextResponse.json({ data: data || [] });
   }
 
+  // For the cloud media picker, fetch from Supabase media table (all media in the folder)
+  // This ensures we always have the correct database UUID as id
+  const supabase = await createServiceRoleClient();
+  const { data: dbMedia } = await supabase
+    .from("media")
+    .select("*")
+    .eq("folder", folder)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (dbMedia && dbMedia.length > 0) {
+    return NextResponse.json({ data: dbMedia });
+  }
+
+  // Fallback to Cloudinary API if no media in Supabase yet
   if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
     return NextResponse.json({ data: [], error: "Cloudinary not configured" });
   }

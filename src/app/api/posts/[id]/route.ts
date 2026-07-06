@@ -73,10 +73,30 @@ export async function PUT(request: Request, context: RouteContext) {
 
   // Link media to this post
   if (body.mediaIds?.length > 0) {
+    // First, unlink any media that was previously linked but is no longer in the list
+    await supabase
+      .from("media")
+      .update({ post_id: null })
+      .eq("post_id", id)
+      .not("id", "in", `(${body.mediaIds.join(",")})`);
+
+    // Link by UUID id
     await supabase
       .from("media")
       .update({ post_id: id })
       .in("id", body.mediaIds);
+
+    // Also try linking by public_id (for cloud-linked media that might use public_id as identifier)
+    await supabase
+      .from("media")
+      .update({ post_id: id })
+      .in("public_id", body.mediaIds);
+  } else {
+    // If no mediaIds provided, unlink all media from this post
+    await supabase
+      .from("media")
+      .update({ post_id: null })
+      .eq("post_id", id);
   }
 
   return NextResponse.json({ data: post });
