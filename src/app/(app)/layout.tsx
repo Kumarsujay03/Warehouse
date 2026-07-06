@@ -13,7 +13,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const check = () => {
       const desktop = window.innerWidth >= 1024;
       setIsDesktop(desktop);
-      if (desktop) setSidebarOpen(true);
     };
     check();
     window.addEventListener("resize", check);

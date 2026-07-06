@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Pencil, Calendar, Target, Tag as TagIcon } from "lucide-react";
+import { ArrowLeft, Pencil, Calendar, Target, Tag as TagIcon, FileText, Image, ExternalLink } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import type { Post, Tag } from "@/lib/types";
+import type { Post, Tag, Resource, Media } from "@/lib/types";
 
 interface PostPreviewProps {
   post: Post & { tags?: string[]; linkedResources?: string[] };
   allTags?: Tag[];
+  resources?: Resource[];
+  media?: Media[];
 }
 
-export function PostPreview({ post, allTags = [] }: PostPreviewProps) {
+export function PostPreview({ post, allTags = [], resources = [], media = [] }: PostPreviewProps) {
   const router = useRouter();
 
   const statusColors: Record<string, string> = {
@@ -24,6 +26,14 @@ export function PostPreview({ post, allTags = [] }: PostPreviewProps) {
     scheduled: "bg-blue-500/20 text-blue-400",
     published: "bg-green-500/20 text-green-400",
     archived: "bg-gray-500/20 text-gray-400",
+  };
+
+  const resourceTypeIcons: Record<string, string> = {
+    paper: "📄",
+    video: "🎬",
+    book: "📚",
+    article: "📰",
+    course: "🎓",
   };
 
   const postTags = allTags.filter((t) => post.tags?.includes(t.id));
@@ -100,7 +110,46 @@ export function PostPreview({ post, allTags = [] }: PostPreviewProps) {
             </Card>
           )}
 
-          {!post.hook && !post.body && !post.notes && (
+          {/* Media section */}
+          {media.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Image className="h-4 w-4" /> Media ({media.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {media.map((m) => (
+                    <a
+                      key={m.id}
+                      href={m.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden rounded-md border transition-colors hover:border-primary"
+                    >
+                      {m.resource_type === "image" ? (
+                        <img
+                          src={m.url}
+                          alt={m.public_id}
+                          className="aspect-square w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex aspect-square items-center justify-center bg-muted">
+                          <FileText className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        {m.format.toUpperCase()} · {(m.bytes / 1024).toFixed(0)}KB
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {!post.hook && !post.body && !post.notes && media.length === 0 && (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 <p>No content yet. Click Edit to start writing.</p>
@@ -140,6 +189,49 @@ export function PostPreview({ post, allTags = [] }: PostPreviewProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Resources section */}
+          {resources.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <FileText className="h-4 w-4" /> Resources ({resources.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {resources.map((resource) => (
+                    <div
+                      key={resource.id}
+                      className="flex items-start gap-2 rounded-md border p-2.5 text-sm"
+                    >
+                      <span className="shrink-0 text-base">{resourceTypeIcons[resource.type] || "📎"}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{resource.title}</p>
+                        {resource.author && (
+                          <p className="text-xs text-muted-foreground">by {resource.author}</p>
+                        )}
+                        {resource.description && (
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{resource.description}</p>
+                        )}
+                      </div>
+                      {resource.url && (
+                        <a
+                          href={resource.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {postTags.length > 0 && (
             <Card>

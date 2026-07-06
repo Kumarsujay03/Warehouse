@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -48,6 +48,35 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
   const [navItems, setNavItems] = useState(defaultNavItems);
   const [reordering, setReordering] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  // Auto-collapse on route change
+  useEffect(() => {
+    if (open) {
+      onClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  // Auto-collapse on click outside (desktop)
+  useEffect(() => {
+    if (!open || !isDesktop) return;
+
+    function handleClickOutside(e: MouseEvent) {
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open, isDesktop, onClose]);
 
   // Load saved order from localStorage
   useEffect(() => {
@@ -58,7 +87,6 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
         const reordered = order
           .map((id) => defaultNavItems.find((item) => item.id === id))
           .filter(Boolean) as typeof defaultNavItems;
-        // Add any new items that weren't in saved order
         const remaining = defaultNavItems.filter((item) => !order.includes(item.id));
         setNavItems([...reordered, ...remaining]);
       }
@@ -78,18 +106,27 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
     saveOrder(items);
   }
 
-  if (!open) return null;
-
   return (
     <>
+      {/* Overlay for mobile — fades in/out */}
       {!isDesktop && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 animate-in fade-in duration-200"
+          className={cn(
+            "fixed inset-0 z-40 bg-black/60 transition-opacity duration-300 ease-in-out",
+            open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          )}
           onClick={onClose}
         />
       )}
 
-      <aside className="fixed left-0 top-0 z-50 h-screen w-64 border-r bg-card shadow-2xl animate-in slide-in-from-left duration-200 sm:w-56">
+      {/* Sidebar — slides in/out smoothly */}
+      <aside
+        ref={sidebarRef}
+        className={cn(
+          "fixed left-0 top-0 z-50 h-screen w-64 border-r bg-card shadow-2xl transition-transform duration-300 ease-in-out sm:w-56",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="flex h-14 items-center justify-between border-b px-4">
@@ -146,7 +183,6 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
                   key={item.id}
                   href={item.href}
                   prefetch={true}
-                  onClick={() => { if (!isDesktop) onClose(); }}
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive

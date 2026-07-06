@@ -51,11 +51,28 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
     .select("*")
     .order("name");
 
+  // Fetch resources linked to this post
+  const { data: resources } = linkedResources.length > 0
+    ? await supabase
+        .from("resources")
+        .select("*")
+        .in("id", linkedResources)
+    : { data: [] };
+
+  // Fetch media attached to this post
+  const { data: media } = await supabase
+    .from("media")
+    .select("*")
+    .eq("post_id", id)
+    .order("created_at", { ascending: false });
+
   // Default: show preview
   return (
     <PostPreview
       post={{ ...post, tags, linkedResources }}
       allTags={allTags || []}
+      resources={resources || []}
+      media={media || []}
     />
   );
 }
