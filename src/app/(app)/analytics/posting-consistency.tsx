@@ -1,16 +1,28 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flame, Trophy, Calendar, Clock, AlertTriangle } from "lucide-react";
+import {
+  Flame,
+  Trophy,
+  Calendar,
+  Clock,
+  AlertTriangle,
+  Lightbulb,
+  Timer,
+  TrendingUp,
+} from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
 interface ConsistencyData {
   currentStreak: number;
   longestStreak: number;
+  avgFrequency: number;
+  daysSinceLastPost: number;
   bestDay: string;
   bestHour: string;
   dayOfWeekCounts: number[];
   gaps: { start: string; end: string; days: number }[];
+  suggestions: string[];
   totalPublished: number;
 }
 
@@ -24,18 +36,45 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
 
   const maxDayCount = Math.max(...data.dayOfWeekCounts, 1);
 
+  // Determine streak health
+  const isOverdue = data.avgFrequency > 0 && data.daysSinceLastPost > data.avgFrequency + 2;
+  const streakColor = isOverdue ? "text-yellow-500" : "text-orange-500";
+
   return (
     <div className="space-y-4">
+      {/* Smart Suggestions */}
+      {data.suggestions.length > 0 && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold">Smart Suggestions</span>
+            </div>
+            <ul className="space-y-1.5">
+              {data.suggestions.map((suggestion, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Streak & Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
-              <Flame className="h-5 w-5 text-orange-500" />
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${isOverdue ? "bg-yellow-500/10" : "bg-orange-500/10"}`}>
+              <Flame className={`h-5 w-5 ${streakColor}`} />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Current Streak</p>
-              <p className="text-2xl font-bold">{data.currentStreak} <span className="text-sm font-normal text-muted-foreground">days</span></p>
+              <p className="text-xs text-muted-foreground">Current Streak</p>
+              <p className="text-2xl font-bold">
+                {data.currentStreak}{" "}
+                <span className="text-xs font-normal text-muted-foreground">posts</span>
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -46,8 +85,26 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
               <Trophy className="h-5 w-5 text-yellow-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Longest Streak</p>
-              <p className="text-2xl font-bold">{data.longestStreak} <span className="text-sm font-normal text-muted-foreground">days</span></p>
+              <p className="text-xs text-muted-foreground">Longest Streak</p>
+              <p className="text-2xl font-bold">
+                {data.longestStreak}{" "}
+                <span className="text-xs font-normal text-muted-foreground">posts</span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10">
+              <Timer className="h-5 w-5 text-cyan-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Avg Frequency</p>
+              <p className="text-2xl font-bold">
+                {data.avgFrequency || "—"}{" "}
+                <span className="text-xs font-normal text-muted-foreground">days</span>
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -58,8 +115,8 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
               <Calendar className="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Best Day</p>
-              <p className="text-2xl font-bold">{data.bestDay}</p>
+              <p className="text-xs text-muted-foreground">Best Day</p>
+              <p className="text-xl font-bold">{data.bestDay}</p>
             </div>
           </CardContent>
         </Card>
@@ -70,12 +127,37 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
               <Clock className="h-5 w-5 text-purple-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Best Time</p>
-              <p className="text-2xl font-bold">{data.bestHour}</p>
+              <p className="text-xs text-muted-foreground">Best Time</p>
+              <p className="text-xl font-bold">{data.bestHour}</p>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Last Post Status */}
+      {data.daysSinceLastPost > 0 && (
+        <Card className={isOverdue ? "border-yellow-500/30" : ""}>
+          <CardContent className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <TrendingUp className={`h-5 w-5 ${isOverdue ? "text-yellow-500" : "text-green-500"}`} />
+              <div>
+                <p className="text-sm font-medium">
+                  {isOverdue ? "Time to post!" : "On track"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Last post was {data.daysSinceLastPost} day{data.daysSinceLastPost > 1 ? "s" : ""} ago
+                  {data.avgFrequency > 0 && ` · Your rhythm: every ~${data.avgFrequency} days`}
+                </p>
+              </div>
+            </div>
+            {isOverdue && (
+              <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-medium text-yellow-500">
+                {Math.round(data.daysSinceLastPost - data.avgFrequency)} days overdue
+              </span>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* Day of Week Distribution */}
@@ -136,7 +218,7 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
                 <Flame className="mb-2 h-8 w-8 text-green-500" />
                 <p className="text-sm font-medium">No major gaps!</p>
                 <p className="text-xs text-muted-foreground">
-                  You&apos;ve been consistent with your posting schedule.
+                  You&apos;ve been consistent with your posting rhythm.
                 </p>
               </div>
             ) : (
@@ -167,7 +249,7 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground">
-                  Showing gaps longer than 7 days between posts.
+                  Gaps longer than {data.avgFrequency > 0 ? `${Math.round(data.avgFrequency * 2)} days` : "7 days"} (2x your rhythm).
                 </p>
               </div>
             )}

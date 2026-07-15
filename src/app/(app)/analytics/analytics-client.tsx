@@ -27,20 +27,28 @@ interface AnalyticsData {
     }[];
   };
   growth: {
-    month: string;
-    posts: number;
+    date: string;
+    title: string;
+    postNumber: number;
     likes: number;
     comments: number;
     impressions: number;
+    cumulativeLikes: number;
+    cumulativeComments: number;
+    cumulativeImpressions: number;
+    cumulativeEngRate: number;
   }[];
   calendar: Record<string, number>;
   consistency: {
     currentStreak: number;
     longestStreak: number;
+    avgFrequency: number;
+    daysSinceLastPost: number;
     bestDay: string;
     bestHour: string;
     dayOfWeekCounts: number[];
     gaps: { start: string; end: string; days: number }[];
+    suggestions: string[];
     totalPublished: number;
   };
   posts: {
