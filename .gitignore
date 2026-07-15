@@ -16,6 +16,9 @@
 # misc
 .DS_Store
 *.pem
+build-result.txt
+build-output.txt
+build-log.txt
 
 # debug
 npm-debug.log*

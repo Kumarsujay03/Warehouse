@@ -60,6 +60,10 @@ CREATE TABLE posts (
   body TEXT,
   notes TEXT,
   resource_id UUID REFERENCES resources(id) ON DELETE SET NULL,
+  likes_count INTEGER NOT NULL DEFAULT 0,
+  comments_count INTEGER NOT NULL DEFAULT 0,
+  impressions_count INTEGER NOT NULL DEFAULT 0,
+  engagement_updated_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

@@ -21,6 +21,10 @@ export interface Post {
   body: string | null;
   notes: string | null;
   resource_id: string | null;
+  likes_count: number;
+  comments_count: number;
+  impressions_count: number;
+  engagement_updated_at: string | null;
   created_at: string;
   updated_at: string;
 }

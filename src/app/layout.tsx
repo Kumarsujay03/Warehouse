@@ -5,7 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: "Warehouse — Research & Content",
+  title: "Warehouse - Research & Content",
   description: "Personal Research & Content Warehouse",
   icons: {
     icon: "/icon.svg",
