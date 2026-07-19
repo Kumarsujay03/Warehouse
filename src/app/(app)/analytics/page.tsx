@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 export default function AnalyticsPage() {
   return (
-    <div className="space-y-6 liquid-glow">
+    <div className="space-y-6">
       {/* Header */}
       <div className="animate-fade-in">
         <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>

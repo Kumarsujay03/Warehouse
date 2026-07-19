@@ -33,7 +33,7 @@ async function getFeedPosts() {
 export default async function FeedPage() {
   const posts = await getFeedPosts();
   return (
-    <div className="space-y-6 liquid-glow">
+    <div className="space-y-6">
       <div className="animate-fade-in">
         <h1 className="text-3xl font-bold tracking-tight">Feed</h1>
         <p className="text-muted-foreground">Preview posts like a LinkedIn feed. Ready and scheduled posts appear first.</p>

@@ -7,7 +7,7 @@ export default async function SettingsPage() {
   const session = await getSession();
 
   return (
-    <div className="space-y-6 liquid-glow">
+    <div className="space-y-6">
       <div className="animate-fade-in">
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">

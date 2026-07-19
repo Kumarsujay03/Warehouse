@@ -24,11 +24,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <ConfirmProvider>
-      <div className="flex min-h-screen bg-background">
-        {/* Ambient background glow */}
-        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-          <div className="absolute -top-[40%] -left-[20%] h-[80%] w-[60%] rounded-full bg-violet-500/[0.02] blur-[120px]" />
-          <div className="absolute -bottom-[30%] -right-[20%] h-[70%] w-[50%] rounded-full bg-blue-500/[0.02] blur-[120px]" />
+      <div className="flex min-h-screen">
+        {/* Ambient background glow — fixed full-viewport, seamless */}
+        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-background">
+          <div className="absolute -top-[30%] left-1/2 h-[70%] w-[70%] -translate-x-1/2 rounded-full bg-violet-500/[0.03] blur-[160px]" />
+          <div className="absolute -bottom-[30%] -right-[10%] h-[60%] w-[50%] rounded-full bg-blue-500/[0.02] blur-[160px]" />
         </div>
 
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} isDesktop={isDesktop} />
