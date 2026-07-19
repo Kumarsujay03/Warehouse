@@ -15,8 +15,8 @@ async function getPosts() {
 export default async function PostsPage() {
   const posts = await getPosts();
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-6 liquid-glow">
+      <div className="animate-fade-in">
         <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
         <p className="text-muted-foreground">Manage your content pipeline.</p>
       </div>

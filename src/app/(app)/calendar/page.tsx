@@ -16,8 +16,8 @@ async function getScheduledPosts() {
 export default async function CalendarPage() {
   const posts = await getScheduledPosts();
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-6 liquid-glow">
+      <div className="animate-fade-in">
         <h1 className="text-3xl font-bold tracking-tight">Calendar</h1>
         <p className="text-muted-foreground">View scheduled posts by date.</p>
       </div>

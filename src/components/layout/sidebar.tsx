@@ -11,7 +11,6 @@ import {
   Cloud,
   Upload,
   Calendar,
-  Search,
   Tags,
   BarChart3,
   Settings,
@@ -31,7 +30,6 @@ const defaultNavItems = [
   { id: "cloud", href: "/cloud", label: "Cloud", icon: Cloud },
   { id: "import", href: "/import", label: "Import / Export", icon: Upload },
   { id: "calendar", href: "/calendar", label: "Calendar", icon: Calendar },
-  { id: "search", href: "/search", label: "Search", icon: Search },
   { id: "tags", href: "/tags", label: "Tags", icon: Tags },
   { id: "analytics", href: "/analytics", label: "Analytics", icon: BarChart3 },
   { id: "settings", href: "/settings", label: "Settings", icon: Settings },
@@ -51,7 +49,6 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
   const sidebarRef = useRef<HTMLElement>(null);
   const isInitialMount = useRef(true);
 
-  // Auto-collapse on route change (skip initial mount)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -63,7 +60,6 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // Auto-collapse on click outside (desktop)
   useEffect(() => {
     if (!open || !isDesktop) return;
 
@@ -83,7 +79,6 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
     };
   }, [open, isDesktop, onClose]);
 
-  // Load saved order from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem("sidebar_order");
@@ -113,29 +108,29 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
 
   return (
     <>
-      {/* Overlay for mobile — fades in/out */}
+      {/* Overlay — frosted blur */}
       {!isDesktop && (
         <div
           className={cn(
-            "fixed inset-0 z-40 bg-black/60 transition-opacity duration-300 ease-in-out",
+            "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-all duration-300 ease-in-out",
             open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar — slides in/out smoothly */}
+      {/* Sidebar — glass panel */}
       <aside
         ref={sidebarRef}
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen w-64 border-r bg-card shadow-2xl transition-transform duration-300 ease-in-out sm:w-56",
+          "fixed left-0 top-0 z-50 h-screen w-64 glass-panel transition-transform duration-300 ease-out sm:w-56",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex h-14 items-center justify-between border-b px-4">
-            <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="flex h-14 items-center justify-between border-b border-white/[0.06] px-4">
+            <Link href="/dashboard" className="flex items-center gap-2 transition-transform duration-200 hover:scale-[1.02]">
               <Logo size="sm" />
             </Link>
             <div className="flex items-center gap-1">
@@ -149,7 +144,7 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
                 </Button>
               )}
               {!isDesktop && (
-                <button onClick={onClose} className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground">
+                <button onClick={onClose} className="rounded-lg p-2 text-muted-foreground transition-all duration-200 hover:bg-white/[0.06] hover:text-foreground">
                   <PanelLeftClose className="h-5 w-5" />
                 </button>
               )}
@@ -157,7 +152,7 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+          <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
             {navItems.map((item, idx) => {
               const isActive = pathname === item.href ||
                 (item.href !== "/" && item.href !== "/feed" && pathname.startsWith(item.href + "/"));
@@ -171,8 +166,8 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
                     onDragOver={(e) => { e.preventDefault(); }}
                     onDrop={() => { if (dragIdx !== null) moveItem(dragIdx, idx); setDragIdx(null); }}
                     className={cn(
-                      "flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium cursor-grab transition-colors",
-                      dragIdx === idx ? "bg-accent/60 opacity-50" : "hover:bg-accent/30",
+                      "flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium cursor-grab transition-all duration-200",
+                      dragIdx === idx ? "bg-white/[0.08] opacity-50 scale-95" : "hover:bg-white/[0.04]",
                       "text-muted-foreground"
                     )}
                   >
@@ -189,13 +184,16 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
                   href={item.href}
                   prefetch={true}
                   className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      ? "bg-white/[0.08] text-foreground shadow-sm shadow-white/[0.02]"
+                      : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"
                   )}
                 >
-                  <item.icon className="h-4 w-4 shrink-0" />
+                  <item.icon className={cn(
+                    "h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110",
+                    isActive && "text-primary"
+                  )} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -204,7 +202,7 @@ export function Sidebar({ open, onClose, isDesktop }: SidebarProps) {
 
           {/* Reorder hint */}
           {reordering && (
-            <div className="border-t px-4 py-2">
+            <div className="border-t border-white/[0.06] px-4 py-2">
               <p className="text-[10px] text-muted-foreground text-center">Drag items to reorder</p>
             </div>
           )}

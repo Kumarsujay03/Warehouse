@@ -35,58 +35,306 @@
   }
 }
 
-/* Scrollbar styling */
+/* ============================================
+   GLASSMORPHISM & LIQUID DISPLAY SYSTEM
+   ============================================ */
+
+@layer components {
+  /* Base glass card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transform: translateY(-1px);
+  }
+
+  /* Subtle glass (for sidebar, nav) */
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  /* Frosted glass panel */
+  .glass-panel {
+    background: rgba(15, 15, 15, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Liquid glow effect */
+  .liquid-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glow::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(99, 102, 241, 0.04) 0%,
+      transparent 50%
+    );
+    animation: liquidShift 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Interactive glass button */
+  .glass-button {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+  }
+
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Glass input */
+  .glass-input {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+  }
+
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* ============================================
+   ANIMATIONS & KEYFRAMES
+   ============================================ */
+
+/* Liquid background shift */
+@keyframes liquidShift {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(10px, -10px) rotate(1deg);
+  }
+  66% {
+    transform: translate(-5px, 5px) rotate(-1deg);
+  }
+}
+
+/* Smooth page entrance */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scale in */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Pulse glow */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(99, 102, 241, 0.1);
+  }
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Fade out slide for deletions */
+@keyframes fadeOutSlide {
+  to {
+    opacity: 0;
+    transform: translateX(-10px) scale(0.95);
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+main {
+  animation: pageIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.deleting-item {
+  animation: fadeOutSlide 0.3s ease forwards;
+}
+
+/* Staggered entrance for children */
+.stagger-children > * {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 480ms; }
+.stagger-children > *:nth-child(n+10) { animation-delay: 540ms; }
+
+/* Card hover lift with glass */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(0 0% 9%);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 25%);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 35%);
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Fix date input calendar icon color */
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+/* Date input calendar icon */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
 }
 
-/* Gmail-style hover checkbox: hidden by default, visible on hover or when selected */
-.selectable-card .select-checkbox {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.selectable-card:hover .select-checkbox,
-.selectable-card.is-selected .select-checkbox {
-  opacity: 1;
-}
-
-/* When any item is selected, show all checkboxes */
-.selection-active .select-checkbox {
-  opacity: 1;
-}
-
-/* Header select-all: hidden until selection mode */
-.header-checkbox {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.selection-active .header-checkbox {
-  opacity: 1;
-}
-
-/* Checkbox dark theme styling */
+/* Checkbox dark theme */
 input[type="checkbox"] {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -94,11 +342,11 @@ input[type="checkbox"] {
   width: 16px;
   height: 16px;
   min-width: 16px;
-  border: 1.5px solid hsl(0 0% 35%);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
-  background: hsl(0 0% 12%);
+  background: rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -106,8 +354,8 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:hover {
-  border-color: hsl(0 0% 55%);
-  background: hsl(0 0% 18%);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 input[type="checkbox"]:checked {
@@ -127,71 +375,26 @@ input[type="checkbox"]:checked::after {
   transform: rotate(45deg);
 }
 
-/* Smooth page transitions */
-@keyframes pageIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-main {
-  animation: pageIn 0.2s ease;
-}
-@keyframes fadeOutSlide {
-  to {
-    opacity: 0;
-    transform: translateX(-10px) scale(0.95);
-  }
-}
-
-.deleting-item {
-  animation: fadeOutSlide 0.3s ease forwards;
-}
-
-/* Card hover lift */
-.hover-lift {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Fade in animation for new items */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeInUp 0.2s ease forwards;
-}
-
-/* Staggered children */
-.stagger-children > * {
-  animation: fadeInUp 0.2s ease forwards;
+/* Gmail-style hover checkbox */
+.selectable-card .select-checkbox {
   opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2) { animation-delay: 30ms; }
-.stagger-children > *:nth-child(3) { animation-delay: 60ms; }
-.stagger-children > *:nth-child(4) { animation-delay: 90ms; }
-.stagger-children > *:nth-child(5) { animation-delay: 120ms; }
-.stagger-children > *:nth-child(6) { animation-delay: 150ms; }
-.stagger-children > *:nth-child(7) { animation-delay: 180ms; }
-.stagger-children > *:nth-child(8) { animation-delay: 210ms; }
-.stagger-children > *:nth-child(9) { animation-delay: 240ms; }
-.stagger-children > *:nth-child(n+10) { animation-delay: 270ms; }
+.selectable-card:hover .select-checkbox,
+.selectable-card.is-selected .select-checkbox {
+  opacity: 1;
+}
+
+.selection-active .select-checkbox {
+  opacity: 1;
+}
+
+.header-checkbox {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.selection-active .header-checkbox {
+  opacity: 1;
+}

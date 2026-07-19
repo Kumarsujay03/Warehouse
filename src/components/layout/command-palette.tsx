@@ -55,25 +55,25 @@ export function CommandPalette() {
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="fixed inset-0 bg-black/50" onClick={() => setOpen(false)} />
-      <div className="fixed left-1/2 top-[20%] z-50 w-full max-w-lg -translate-x-1/2 px-4">
-        <Command className="rounded-lg border bg-popover shadow-2xl">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
+      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 px-4">
+        <Command className="rounded-xl overflow-hidden shadow-2xl animate-scale-in" style={{ background: "hsl(0 0% 9%)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <Command.Input
             placeholder="Type a command or search..."
             autoFocus
-            className="h-12 w-full border-b bg-transparent px-4 text-sm outline-none placeholder:text-muted-foreground"
+            className="h-12 w-full border-b border-white/[0.06] bg-transparent px-4 text-sm outline-none placeholder:text-muted-foreground"
           />
           <Command.List className="max-h-80 overflow-y-auto p-2">
             <Command.Empty className="py-6 text-center text-sm text-muted-foreground">
               No results found.
             </Command.Empty>
-            <Command.Group heading="Navigation">
+            <Command.Group heading="Navigation" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
               {commands.map((cmd) => (
                 <Command.Item
                   key={cmd.href}
                   value={cmd.label}
                   onSelect={() => runCommand(cmd.href)}
-                  className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent"
+                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-150 hover:bg-white/[0.06] data-[selected=true]:bg-white/[0.08]"
                 >
                   <cmd.icon className="h-4 w-4 text-muted-foreground" />
                   {cmd.label}

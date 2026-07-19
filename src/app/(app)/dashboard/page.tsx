@@ -1,6 +1,6 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Library, Cloud, Tags, Upload } from "lucide-react";
+import { FileText, Library, Cloud, Tags, Upload, Plus, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { RecentPostsList, UpcomingPostsList, RecentImportsList } from "./dashboard-lists";
 
@@ -65,33 +65,34 @@ export default async function DashboardPage() {
   ]);
 
   const statCards = [
-    { label: "Posts", value: stats.posts, icon: FileText, href: "/posts" },
-    { label: "Resources", value: stats.resources, icon: Library, href: "/library" },
-    { label: "Media", value: stats.media, icon: Cloud, href: "/cloud" },
-    { label: "Tags", value: stats.tags, icon: Tags, href: "/tags" },
-    { label: "Imports", value: stats.imports, icon: Upload, href: "/import" },
+    { label: "Posts", value: stats.posts, icon: FileText, href: "/posts", color: "from-violet-500/10" },
+    { label: "Resources", value: stats.resources, icon: Library, href: "/library", color: "from-blue-500/10" },
+    { label: "Media", value: stats.media, icon: Cloud, href: "/cloud", color: "from-cyan-500/10" },
+    { label: "Tags", value: stats.tags, icon: Tags, href: "/tags", color: "from-pink-500/10" },
+    { label: "Imports", value: stats.imports, icon: Upload, href: "/import", color: "from-amber-500/10" },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-8 liquid-glow">
+      {/* Header */}
+      <div className="animate-fade-in">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">Your content warehouse at a glance.</p>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 stagger-children">
         {statCards.map((stat) => (
           <Link key={stat.label} href={stat.href}>
-            <Card className="transition-colors hover:bg-accent/50 hover-lift">
+            <Card className={`group hover-lift cursor-pointer bg-gradient-to-br ${stat.color} to-transparent`}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {stat.label}
                 </CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
+                <stat.icon className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-3xl font-bold">{stat.value}</div>
               </CardContent>
             </Card>
           </Link>
@@ -99,28 +100,43 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3 stagger-children">
         <Link href="/posts/new">
-          <Card className="cursor-pointer transition-colors hover:bg-accent/50 hover-lift">
-            <CardContent className="flex items-center gap-3 p-4">
-              <FileText className="h-5 w-5" />
-              <span className="text-sm font-medium">New Post</span>
+          <Card className="group cursor-pointer hover-lift">
+            <CardContent className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.06] transition-colors group-hover:bg-white/[0.1]">
+                  <Plus className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-medium">New Post</span>
+              </div>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </CardContent>
           </Card>
         </Link>
         <Link href="/import">
-          <Card className="cursor-pointer transition-colors hover:bg-accent/50 hover-lift">
-            <CardContent className="flex items-center gap-3 p-4">
-              <Upload className="h-5 w-5" />
-              <span className="text-sm font-medium">Import Content</span>
+          <Card className="group cursor-pointer hover-lift">
+            <CardContent className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.06] transition-colors group-hover:bg-white/[0.1]">
+                  <Upload className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-medium">Import Content</span>
+              </div>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </CardContent>
           </Card>
         </Link>
         <Link href="/cloud">
-          <Card className="cursor-pointer transition-colors hover:bg-accent/50 hover-lift">
-            <CardContent className="flex items-center gap-3 p-4">
-              <Cloud className="h-5 w-5" />
-              <span className="text-sm font-medium">Upload Media</span>
+          <Card className="group cursor-pointer hover-lift">
+            <CardContent className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.06] transition-colors group-hover:bg-white/[0.1]">
+                  <Cloud className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-medium">Upload Media</span>
+              </div>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </CardContent>
           </Card>
         </Link>

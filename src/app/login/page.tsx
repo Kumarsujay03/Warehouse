@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -47,10 +48,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center bg-background p-4 overflow-hidden">
+      {/* Ambient background glow */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] h-[60%] w-[40%] rounded-full bg-violet-500/[0.03] blur-[100px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] h-[50%] w-[40%] rounded-full bg-blue-500/[0.03] blur-[100px]" />
+        <div className="absolute top-[30%] right-[20%] h-[30%] w-[25%] rounded-full bg-emerald-500/[0.02] blur-[80px]" />
+      </div>
+
+      <Card className="w-full max-w-sm glass-card animate-scale-in">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto mb-2">
+          <div className="mx-auto mb-2 animate-float">
             <Logo size="lg" showText={false} />
           </div>
           <CardTitle className="text-2xl">Warehouse</CardTitle>
@@ -59,7 +67,7 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive animate-fade-in">
                 {error}
               </div>
             )}
@@ -71,6 +79,7 @@ export default function LoginPage() {
                 placeholder="admin@warehouse.local"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="glass-input"
                 required
               />
             </div>
@@ -81,11 +90,19 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="glass-input"
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
+            <Button type="submit" className="w-full glass-button" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
         </CardContent>
