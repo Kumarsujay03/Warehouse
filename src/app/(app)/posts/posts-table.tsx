@@ -179,7 +179,7 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
           </SelectContent>
         </Select>
         <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setCurrentPage(1); }}>
-          <SelectTrigger className="w-[130px]"><SelectValue placeholder="Category" /></SelectTrigger>
+          <SelectTrigger className="w-[170px]"><SelectValue placeholder="Category" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {categories.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
