@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Upload, Trash2, Copy, ExternalLink, Loader2, Download, Grid, List, LayoutGrid } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/confirm-dialog";
 
 interface MediaItem {
   id: string;
@@ -40,6 +41,7 @@ export function CloudView() {
   const [folder, setFolder] = useState("Assests_warehouse");
   const [viewMode, setViewMode] = useState<ViewMode>("grid-md");
   const { toast } = useToast();
+  const confirm = useConfirm();
 
   async function loadMedia() {
     setLoading(true);
@@ -83,7 +85,14 @@ export function CloudView() {
   }
 
   async function handleDelete(item: MediaItem) {
-    if (!confirm("Delete this file?")) return;
+    const ok = await confirm({
+      title: "Delete File",
+      description: `Delete "${item.public_id}"? This will permanently remove it from cloud storage.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/media/${encodeURIComponent(item.public_id)}`, { method: "DELETE" });
       if (res.ok) {

@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Save, Trash2, X, Plus, Upload, Loader2, Link2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/confirm-dialog";
 import type { Post, Tag, Resource } from "@/lib/types";
 
 interface MediaItem {
@@ -41,6 +42,7 @@ interface PostEditorProps {
 export function PostEditor({ post }: PostEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -219,7 +221,15 @@ export function PostEditor({ post }: PostEditorProps) {
   }
 
   async function handleDelete() {
-    if (!post || !confirm("Delete this post?")) return;
+    if (!post) return;
+    const ok = await confirm({
+      title: "Delete Post",
+      description: `Delete "${post.title}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setLoading(true);
     try {
       await fetch(`/api/posts/${post.id}`, { method: "DELETE" });

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Trash2, Loader2 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/confirm-dialog";
 
 interface Post {
   id: string;
@@ -30,6 +31,7 @@ export function RecentPostsList({ posts }: { posts: Post[] }) {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const hasSelection = selected.size > 0;
 
   function toggle(id: string) {
@@ -39,7 +41,14 @@ export function RecentPostsList({ posts }: { posts: Post[] }) {
   }
 
   async function handleDelete() {
-    if (!confirm(`Delete ${selected.size} post(s)?`)) return;
+    const ok = await confirm({
+      title: "Delete Posts",
+      description: `Are you sure you want to delete ${selected.size} post(s)? This action cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     setDeletingIds(new Set(selected));
     await new Promise((r) => setTimeout(r, 300));
@@ -87,7 +96,7 @@ export function RecentPostsList({ posts }: { posts: Post[] }) {
                 <Link href={`/posts/${post.id}`} className="flex flex-1 items-center justify-between min-w-0">
                   <span className="truncate text-sm font-medium">{post.title}</span>
                   <span className="shrink-0 text-xs text-muted-foreground ml-2">
-                    {formatDate(post.created_at)}
+                    {formatDate(post.publish_date || post.created_at)}
                   </span>
                 </Link>
               </div>
@@ -138,6 +147,7 @@ export function RecentImportsList({ imports }: { imports: Import[] }) {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const hasSelection = selected.size > 0;
 
   function toggle(id: string) {
@@ -147,7 +157,14 @@ export function RecentImportsList({ imports }: { imports: Import[] }) {
   }
 
   async function handleDelete() {
-    if (!confirm(`Delete ${selected.size} import record(s)?`)) return;
+    const ok = await confirm({
+      title: "Delete Imports",
+      description: `Delete ${selected.size} import record(s)? This cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     setDeletingIds(new Set(selected));
     await new Promise((r) => setTimeout(r, 300));
@@ -161,16 +178,42 @@ export function RecentImportsList({ imports }: { imports: Import[] }) {
     router.refresh();
   }
 
+  async function handleClearAll() {
+    const ok = await confirm({
+      title: "Clear All Imports",
+      description: "This will delete all import records permanently. This cannot be undone.",
+      confirmText: "Clear All",
+      loadingText: "Clearing...",
+      variant: "destructive",
+    });
+    if (!ok) return;
+    setDeleting(true);
+    for (const imp of imports) {
+      await fetch(`/api/imports/${imp.id}`, { method: "DELETE" });
+    }
+    toast({ title: "Cleared all imports" });
+    setDeleting(false);
+    router.refresh();
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Recent Imports</CardTitle>
-        {hasSelection && (
-          <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
-            {deleting ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Trash2 className="mr-1 h-3 w-3" />}
-            {selected.size}
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {hasSelection && (
+            <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
+              {deleting ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Trash2 className="mr-1 h-3 w-3" />}
+              {selected.size}
+            </Button>
+          )}
+          {imports.length > 0 && !hasSelection && (
+            <Button variant="ghost" size="sm" onClick={handleClearAll} disabled={deleting} className="text-xs text-muted-foreground hover:text-destructive">
+              {deleting ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Trash2 className="mr-1 h-3 w-3" />}
+              Clear All
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {imports.length === 0 ? (

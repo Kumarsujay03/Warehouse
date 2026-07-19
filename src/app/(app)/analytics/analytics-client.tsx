@@ -6,7 +6,8 @@ import { ContributionCalendar } from "./contribution-calendar";
 import { PostingConsistency } from "./posting-consistency";
 import { EngagementMetrics } from "./engagement-metrics";
 import { EngagementEditor } from "./engagement-editor";
-import { Loader2, TrendingUp, Activity, Calendar, Target, Pencil } from "lucide-react";
+import { ScheduleSection } from "./schedule-section";
+import { Loader2, TrendingUp, Activity, Calendar, Target, Pencil, CalendarClock } from "lucide-react";
 
 interface AnalyticsData {
   engagement: {
@@ -68,6 +69,7 @@ const TABS = [
   { id: "engagement", label: "Engagement", icon: Activity },
   { id: "activity", label: "Activity", icon: Calendar },
   { id: "consistency", label: "Consistency", icon: Target },
+  { id: "schedule", label: "Schedule", icon: CalendarClock },
   { id: "manage", label: "Manage Data", icon: Pencil },
 ] as const;
 
@@ -158,6 +160,10 @@ export function AnalyticsClient() {
 
         {activeTab === "consistency" && (
           <PostingConsistency data={data.consistency} />
+        )}
+
+        {activeTab === "schedule" && (
+          <ScheduleSection />
         )}
 
         {activeTab === "manage" && (

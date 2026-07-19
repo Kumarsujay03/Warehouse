@@ -10,7 +10,6 @@ import {
   Clock,
   CheckCircle2,
 } from "lucide-react";
-import { BackButton } from "@/components/back-button";
 import { AnalyticsClient } from "./analytics-client";
 
 export const dynamic = "force-dynamic";
@@ -61,14 +60,11 @@ export default async function AnalyticsPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-            <p className="text-sm text-muted-foreground">
-              Track your content performance and growth.
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+          <p className="text-sm text-muted-foreground">
+            Track your content performance and growth.
+          </p>
         </div>
         <div className="hidden items-center gap-2 rounded-full bg-primary/10 px-4 py-2 sm:flex">
           <CheckCircle2 className="h-4 w-4 text-primary" />

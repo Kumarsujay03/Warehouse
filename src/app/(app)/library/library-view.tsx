@@ -16,6 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, ExternalLink, Trash2, Loader2, Grid, List, Edit, LayoutGrid } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/confirm-dialog";
 import { cn } from "@/lib/utils";
 import type { Resource, Project } from "@/lib/types";
 
@@ -39,6 +40,7 @@ export function LibraryView({ resources, projects }: LibraryViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
 
   const filteredResources = resources.filter(
     (r) => r.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -69,7 +71,14 @@ export function LibraryView({ resources, projects }: LibraryViewProps) {
 
   async function handleDeleteResources() {
     if (selectedResources.size === 0) return;
-    if (!confirm(`Delete ${selectedResources.size} resource(s)?`)) return;
+    const ok = await confirm({
+      title: "Delete Resources",
+      description: `Delete ${selectedResources.size} resource(s)? This cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     setDeletingIds(new Set(selectedResources));
 
@@ -94,7 +103,14 @@ export function LibraryView({ resources, projects }: LibraryViewProps) {
 
   async function handleDeleteProjects() {
     if (selectedProjects.size === 0) return;
-    if (!confirm(`Delete ${selectedProjects.size} project(s)?`)) return;
+    const ok = await confirm({
+      title: "Delete Projects",
+      description: `Delete ${selectedProjects.size} project(s)? This cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     setDeletingIds(new Set(selectedProjects));
     await new Promise((r) => setTimeout(r, 300));
@@ -302,6 +318,7 @@ function ResourceDialog({ open, onClose, resource, projects, onSaved }: {
   open: boolean; onClose: () => void; resource: Resource | null; projects: Project[]; onSaved: () => void;
 }) {
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [form, setForm] = useState({ title: "", type: "article" as Resource["type"], url: "", author: "", description: "", notes: "", project_id: "" });
   const [saving, setSaving] = useState(false);
 
@@ -320,7 +337,15 @@ function ResourceDialog({ open, onClose, resource, projects, onSaved }: {
   }
 
   async function handleDelete() {
-    if (!resource || !confirm("Delete this resource?")) return;
+    if (!resource) return;
+    const ok = await confirm({
+      title: "Delete Resource",
+      description: `Delete "${resource.title}"? This cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     const res = await fetch(`/api/resources/${resource.id}`, { method: "DELETE" });
     if (res.ok) { toast({ title: "Resource deleted" }); onSaved(); }
   }
@@ -360,6 +385,7 @@ function ProjectDialog({ open, onClose, project, onSaved }: {
   open: boolean; onClose: () => void; project: Project | null; onSaved: () => void;
 }) {
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [form, setForm] = useState({ title: "", description: "", status: "active" as Project["status"], url: "" });
   const [saving, setSaving] = useState(false);
 
@@ -378,7 +404,15 @@ function ProjectDialog({ open, onClose, project, onSaved }: {
   }
 
   async function handleDelete() {
-    if (!project || !confirm("Delete this project?")) return;
+    if (!project) return;
+    const ok = await confirm({
+      title: "Delete Project",
+      description: `Delete "${project.title}"? This cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     const res = await fetch(`/api/projects/${project.id}`, { method: "DELETE" });
     if (res.ok) { toast({ title: "Project deleted" }); onSaved(); }
   }

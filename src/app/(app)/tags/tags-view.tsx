@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 interface TagWithCount {
@@ -25,6 +26,7 @@ export function TagsView({ tags }: { tags: TagWithCount[] }) {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
 
   const hasSelection = selectedTags.size > 0;
 
@@ -52,7 +54,14 @@ export function TagsView({ tags }: { tags: TagWithCount[] }) {
 
   async function handleDeleteSelected() {
     if (selectedTags.size === 0) return;
-    if (!confirm(`Delete ${selectedTags.size} tag(s)?`)) return;
+    const ok = await confirm({
+      title: "Delete Tags",
+      description: `Delete ${selectedTags.size} tag(s)? Posts using these tags will be untagged.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     setDeletingIds(new Set(selectedTags));
     await new Promise((r) => setTimeout(r, 300));

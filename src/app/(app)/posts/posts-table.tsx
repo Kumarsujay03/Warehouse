@@ -24,6 +24,7 @@ import {
 import { Plus, ArrowUpDown, Trash2, ChevronLeft, ChevronRight, Loader2, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 interface PostItem {
@@ -53,8 +54,7 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const router = useRouter();
   const { toast } = useToast();
-
-  // Load saved preferences
+  const confirm = useConfirm();
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem("posts_prefs");
@@ -125,7 +125,14 @@ export function PostsTable({ posts }: { posts: PostItem[] }) {
 
   async function handleDeleteSelected() {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Delete ${selectedIds.size} post(s)?`)) return;
+    const ok = await confirm({
+      title: "Delete Posts",
+      description: `Are you sure you want to delete ${selectedIds.size} post(s)? This action cannot be undone.`,
+      confirmText: "Delete",
+      loadingText: "Deleting...",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     setDeletingIds(new Set(selectedIds));
     await new Promise((r) => setTimeout(r, 300));

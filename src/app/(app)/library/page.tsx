@@ -1,6 +1,5 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { LibraryView } from "./library-view";
-import { BackButton } from "@/components/back-button";
 
 export const dynamic = "force-dynamic";
 
@@ -27,14 +26,11 @@ export default async function LibraryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <BackButton />
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Library</h1>
-          <p className="text-muted-foreground">
-            Research papers, videos, books, articles, courses & projects.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Library</h1>
+        <p className="text-muted-foreground">
+          Research papers, videos, books, articles, courses & projects.
+        </p>
       </div>
       <LibraryView resources={resources} projects={projects} />
     </div>

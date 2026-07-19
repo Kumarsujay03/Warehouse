@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Flame,
   Trophy,
@@ -10,6 +12,9 @@ import {
   Lightbulb,
   Timer,
   TrendingUp,
+  Info,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
@@ -29,6 +34,7 @@ interface ConsistencyData {
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function PostingConsistency({ data }: { data: ConsistencyData }) {
+  const [showExplanation, setShowExplanation] = useState(false);
   const dayChartData = DAY_LABELS.map((day, i) => ({
     day,
     posts: data.dayOfWeekCounts[i],
@@ -46,21 +52,114 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
       {data.suggestions.length > 0 && (
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="p-4">
-            <div className="mb-2 flex items-center gap-2">
-              <Lightbulb className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold">Smart Suggestions</span>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold">Smart Suggestions</span>
+              </div>
             </div>
-            <ul className="space-y-1.5">
-              {data.suggestions.map((suggestion, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                  {suggestion}
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-2">
+              {data.suggestions.map((suggestion, i) => {
+                // Determine if this suggestion is actionable
+                const isScheduleRelated = suggestion.includes("overdue") || suggestion.includes("Next post") || suggestion.includes("Post today");
+                const isFrequencyRelated = suggestion.includes("reducing") || suggestion.includes("Consider posting");
+
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-background/50 px-3 py-2.5"
+                  >
+                    <div className="flex items-start gap-2 min-w-0 flex-1">
+                      <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      <span className="text-sm text-muted-foreground">{suggestion}</span>
+                    </div>
+                    {(isScheduleRelated || isFrequencyRelated) && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="shrink-0 h-7 px-3 text-xs"
+                        onClick={() => {
+                          if (isScheduleRelated) {
+                            window.location.href = "/posts/new";
+                          } else {
+                            // Scroll to schedule section or switch tab
+                            const tabEl = document.querySelector('[data-tab="schedule"]');
+                            if (tabEl) (tabEl as HTMLElement).click();
+                          }
+                        }}
+                      >
+                        Apply
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
       )}
+
+      {/* How It's Calculated */}
+      <Card className="border-border/50">
+        <CardContent className="p-0">
+          <Button
+            variant="ghost"
+            className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium hover:bg-accent/50"
+            onClick={() => setShowExplanation(!showExplanation)}
+          >
+            <span className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              How are these calculated?
+            </span>
+            {showExplanation ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            )}
+          </Button>
+          {showExplanation && (
+            <div className="border-t px-4 pb-4 pt-3">
+              <div className="space-y-3 text-xs text-muted-foreground">
+                <div>
+                  <p className="font-medium text-foreground">Streak</p>
+                  <p>
+                    Counts consecutive posts that maintain your rhythm. If your average gap is ~{data.avgFrequency || 3} days,
+                    any gap under {Math.max((data.avgFrequency || 3) + 2, 4)} days (rhythm + 2 grace days) keeps the streak alive.
+                    Unlike GitHub&apos;s daily streak, this respects your natural posting frequency.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Best Day</p>
+                  <p>
+                    The day of the week you&apos;ve published most frequently. Based on {data.totalPublished} published posts.
+                    Your distribution: {DAY_LABELS.map((d, i) => data.dayOfWeekCounts[i] > 0 ? `${d}(${data.dayOfWeekCounts[i]})` : null).filter(Boolean).join(", ") || "No data yet"}.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Best Time</p>
+                  <p>
+                    The hour (UTC) when most of your posts were published. This is when your audience likely expects content.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Avg Frequency</p>
+                  <p>
+                    Total days between your first and last post, divided by number of intervals.
+                    ({data.totalPublished} posts over the period = ~{data.avgFrequency || "—"} days between posts).
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Posting Gaps</p>
+                  <p>
+                    Periods longer than 2× your average frequency ({Math.round((data.avgFrequency || 3.5) * 2)} days).
+                    These indicate breaks from your rhythm that may affect audience retention.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Streak & Summary Cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
