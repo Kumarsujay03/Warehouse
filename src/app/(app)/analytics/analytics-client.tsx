@@ -7,7 +7,7 @@ import { PostingConsistency } from "./posting-consistency";
 import { EngagementMetrics } from "./engagement-metrics";
 import { EngagementEditor } from "./engagement-editor";
 import { ScheduleSection } from "./schedule-section";
-import { Loader2, TrendingUp, Activity, Calendar, Target, Pencil, CalendarClock } from "lucide-react";
+import { Loader2, TrendingUp, Target, Pencil, CalendarClock } from "lucide-react";
 
 interface AnalyticsData {
   engagement: {
@@ -66,8 +66,6 @@ interface AnalyticsData {
 
 const TABS = [
   { id: "overview", label: "Overview", icon: TrendingUp },
-  { id: "engagement", label: "Engagement", icon: Activity },
-  { id: "activity", label: "Activity", icon: Calendar },
   { id: "consistency", label: "Consistency", icon: Target },
   { id: "schedule", label: "Schedule", icon: CalendarClock },
   { id: "manage", label: "Manage Data", icon: Pencil },
@@ -80,6 +78,7 @@ export function AnalyticsClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [appliedSuggestions, setAppliedSuggestions] = useState<Set<number>>(new Set());
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -150,16 +149,12 @@ export function AnalyticsClient() {
           </div>
         )}
 
-        {activeTab === "engagement" && (
-          <EngagementMetrics data={data.engagement} />
-        )}
-
-        {activeTab === "activity" && (
-          <ContributionCalendar data={data.calendar} />
-        )}
-
         {activeTab === "consistency" && (
-          <PostingConsistency data={data.consistency} />
+          <PostingConsistency
+            data={data.consistency}
+            appliedSuggestions={appliedSuggestions}
+            onApplied={(idx) => setAppliedSuggestions((prev) => new Set(prev).add(idx))}
+          />
         )}
 
         {activeTab === "schedule" && (

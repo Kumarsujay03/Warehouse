@@ -15,6 +15,8 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  Loader2,
+  Check,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
@@ -33,8 +35,17 @@ interface ConsistencyData {
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export function PostingConsistency({ data }: { data: ConsistencyData }) {
+export function PostingConsistency({
+  data,
+  appliedSuggestions,
+  onApplied,
+}: {
+  data: ConsistencyData;
+  appliedSuggestions: Set<number>;
+  onApplied: (index: number) => void;
+}) {
   const [showExplanation, setShowExplanation] = useState(false);
+  const [applyingIndex, setApplyingIndex] = useState<number | null>(null);
   const dayChartData = DAY_LABELS.map((day, i) => ({
     day,
     posts: data.dayOfWeekCounts[i],
@@ -63,32 +74,44 @@ export function PostingConsistency({ data }: { data: ConsistencyData }) {
                 // Determine if this suggestion is actionable
                 const isScheduleRelated = suggestion.includes("overdue") || suggestion.includes("Next post") || suggestion.includes("Post today");
                 const isFrequencyRelated = suggestion.includes("reducing") || suggestion.includes("Consider posting");
+                const isApplied = appliedSuggestions.has(i);
+                const isApplying = applyingIndex === i;
 
                 return (
                   <div
                     key={i}
                     className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-background/50 px-3 py-2.5"
                   >
-                    <div className="flex items-start gap-2 min-w-0 flex-1">
-                      <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
                       <span className="text-sm text-muted-foreground">{suggestion}</span>
                     </div>
                     {(isScheduleRelated || isFrequencyRelated) && (
                       <Button
                         size="sm"
-                        variant="secondary"
-                        className="shrink-0 h-7 px-3 text-xs"
-                        onClick={() => {
+                        variant={isApplied ? "ghost" : "secondary"}
+                        className={`shrink-0 h-7 px-3 text-xs ${isApplied ? "text-green-500 pointer-events-none" : ""}`}
+                        disabled={isApplying || isApplied}
+                        onClick={async () => {
+                          setApplyingIndex(i);
+                          await new Promise((r) => setTimeout(r, 600));
+                          setApplyingIndex(null);
+                          onApplied(i);
                           if (isScheduleRelated) {
-                            window.location.href = "/posts/new";
-                          } else {
-                            // Scroll to schedule section or switch tab
-                            const tabEl = document.querySelector('[data-tab="schedule"]');
-                            if (tabEl) (tabEl as HTMLElement).click();
+                            setTimeout(() => { window.location.href = "/posts/new"; }, 300);
                           }
                         }}
                       >
-                        Apply
+                        {isApplying ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : isApplied ? (
+                          <>
+                            <Check className="mr-1 h-3 w-3" />
+                            Applied
+                          </>
+                        ) : (
+                          "Apply"
+                        )}
                       </Button>
                     )}
                   </div>
