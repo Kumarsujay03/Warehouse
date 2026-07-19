@@ -137,7 +137,6 @@ src/
 │   │   ├── import/         # Import with templates
 │   │   ├── export/         # Export analytics + AI prompt generator
 │   │   ├── calendar/       # Schedule visualization
-│   │   ├── search/         # Global cross-table search
 │   │   ├── tags/           # Tag management
 │   │   ├── analytics/      # Advanced analytics dashboard
 │   │   ├── settings/       # Profile, avatar, credentials
@@ -172,10 +171,9 @@ src/
 - **Cloud** — Cloudinary browser with folder switching, view modes, download, upload
 - **Import** — Parse HTML/JSON/Markdown → preview → validate → save with auto-resource creation
 - **Calendar** — Monthly view of scheduled posts
-- **Search** — Cross-table search (posts, resources, projects, media, tags)
 - **Tags** — Many-to-many tagging with color coding
 - **Settings** — Profile, avatar picker, email/password change, environment status
-- **Command Palette** — Ctrl+K navigation
+- **Command Palette** — Ctrl+K navigation and global search (replaces dedicated search page)
 - **Responsive** — Desktop-first with mobile support
 
 ### Analytics (v2)
@@ -225,11 +223,12 @@ ALTER TABLE posts
 
 ### Exporting for AI Analysis
 
-1. Go to **Export** page (sidebar)
-2. Click "Export JSON + AI Prompt" to download your data
-3. Copy the generated AI prompt
-4. Paste into ChatGPT/Claude/Gemini for personalized content strategy analysis
-5. The prompt asks for: content performance analysis, timing optimization, hook analysis, growth strategy, and title improvements
+1. Go to **Import / Export** page (sidebar)
+2. Scroll down to "Export Analytics" section
+3. Click "Export JSON + AI Prompt" to download your data
+4. Copy the generated AI prompt
+5. Paste into ChatGPT/Claude/Gemini for personalized content strategy analysis
+6. The prompt asks for: content performance analysis, timing optimization, hook analysis, growth strategy, and title improvements
 
 ## Import Format
 
@@ -264,7 +263,6 @@ Resources are auto-created and linked. Duplicate URLs reuse existing resources.
 | `/api/projects` | GET, POST | List/create projects |
 | `/api/tags` | GET, POST | List/create tags |
 | `/api/media` | GET, POST | List/upload media |
-| `/api/search` | GET | Cross-table search |
 | `/api/analytics` | GET | Full analytics data (engagement, growth, calendar, consistency) |
 | `/api/analytics/engagement` | PUT | Bulk update likes/comments/impressions |
 | `/api/analytics/export` | GET | Export JSON/CSV with AI prompt |
@@ -287,14 +285,30 @@ Resources are auto-created and linked. Duplicate URLs reuse existing resources.
 
 ## Changelog
 
+### v2.2.0
+- **Glassmorphism UI overhaul** — All cards, sidebar, inputs, and dialogs now use frosted glass effects with backdrop-blur
+- **Liquid display effects** — Subtle animated radial gradient backgrounds on pages, ambient glow orbs behind the app
+- **Page transitions** — Smooth fade-in animations on every route change, staggered children entrances
+- **Sidebar redesign** — Glass panel with hover icon scale animations, removed active dot indicator
+- **Dashboard redesign** — Gradient stat cards, staggered entrance animations, arrow-reveal on quick actions
+- **Analytics layout fix** — Engagement metrics at top → Tabs → Content → Growth chart at bottom
+- **Command palette centered** — Now properly centered both horizontally and vertically
+- **Search page removed** — Ctrl+K command palette and header search bar handle all search needs
+- **Login page** — Glass card with ambient glow orbs, floating logo, scale-in entrance animation
+- **Input component** — Borderless seamless design matching page background
+- **Custom confirmation dialog** — Themed with loading states and progress animation
+- **Removed redundant Engagement/Activity tabs** from analytics (merged into Overview)
+- **Export & AI merged** into Import/Export page (fewer sidebar items)
+- **Apply button states persist** across tab switches in analytics
+
 ### v2.0.0
-- Advanced analytics dashboard with tabbed navigation (Overview, Engagement, Activity, Consistency, Schedule, Manage Data)
+- Advanced analytics dashboard with tabbed navigation (Overview, Consistency, Schedule, Manage Data)
 - Growth timeline chart (per-post bars + cumulative growth lines using Recharts ComposedChart)
 - GitHub-style contribution calendar (52-week posting heatmap)
 - Engagement metrics with impressions, likes, comments, and engagement rate
 - Smart suggestions with "Apply" buttons and "How it's calculated" explanations
 - Auto-schedule feature (Apply Best Day & Time / Auto-Distribute based on optimal frequency)
-- Export page with JSON/CSV download + AI-ready prompt generation
+- Export with JSON/CSV download + AI-ready prompt generation
 - Custom themed confirmation dialog replacing all native browser confirm() popups
 - Toast notifications positioned at top-right corner
 - Removed back buttons from top-level pages (cleaner sidebar-based navigation)
